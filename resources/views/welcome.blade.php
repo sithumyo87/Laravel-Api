@@ -29,16 +29,8 @@
                             <td>Action</td>
                         </tr>
                         </thead>
-                        <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>John</td>
-                            <td>Fight with Hands</td>
-                            <td>
-                                <button class="btn btn-success btn-sm">Edit</button>
-                                <button class="btn btn-danger btn-sm">Delete</button>
-                            </td>
-                        </tr>
+                        <tbody id="post">
+
                         </tbody>
                     </table>
                 </div>
@@ -61,5 +53,18 @@
 
         <!-- JavaScript Bundle with Popper -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    {{--axios--}}
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script>
+            axios.get('/api/posts')
+                .then(res => {
+                   var postData =  document.getElementById('post');
+                   res.data.forEach(item => {
+                       postData.innerHTML += ' <tr><td>'+item.id+'</td> <td>'+item.title+'</td> <td>'+item.description+'</td> <td> <button class="btn btn-success btn-sm">Edit</button> <button class="btn btn-danger btn-sm">Delete</button> </td> </tr>'
+                   })
+                })
+                .catch(err=>console.log(err))
+        </script>
+
 </body>
 </html>

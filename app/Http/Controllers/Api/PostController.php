@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Post;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
@@ -14,7 +15,8 @@ class PostController extends Controller
      */
     public function index()
     {
-        //
+        $posts = Post::all();
+        return response()->json($posts,200);
     }
 
     /**
@@ -25,7 +27,11 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $post = Post::create([
+            'title'=>$request->title,
+            'description'=>$request->description,
+        ]);
+        return  response()->json($post,200);
     }
 
     /**
@@ -36,7 +42,8 @@ class PostController extends Controller
      */
     public function show($id)
     {
-        //
+        $post = Post::find($id);
+        return  response()->json($post,200);
     }
 
     /**
@@ -48,7 +55,12 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $post = Post::findOrFail($id);
+        $post->update([
+            'title'=>$request->title,
+            'description'=>$request->description,
+        ]);
+        return response()->json(['msg'=>'successfully updated'],200);
     }
 
     /**
@@ -59,6 +71,8 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $post = Post::find($id);
+        $post->delete();
+        return  response()->json(['msg'=>'successfully Deleted'],200);
     }
 }

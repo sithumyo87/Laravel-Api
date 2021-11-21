@@ -9,4 +9,5 @@ class Post extends Model
 {
     use HasFactory;
     public $fillable = ['title','description'];
+    public $hidden = ['created_at','updated_at'];
 }
