@@ -17,7 +17,7 @@ class PostController extends Controller
     public function index()
     {
         $posts = Post::all();
-        return response()->json($posts,200);
+        return response()->json(['posts'=>$posts],200);
     }
 
     /**
@@ -42,7 +42,7 @@ class PostController extends Controller
                 'title'=>$request->title,
                 'description'=>$request->description,
             ]);
-            return  response()->json([$post, 'msg' => 'Succssfully Inserted'],200);
+            return  response()->json(['post'=>$post, 'msg' => 'Succssfully Inserted'],200);
         }
     }
 
@@ -55,7 +55,7 @@ class PostController extends Controller
     public function show($id)
     {
         $post = Post::find($id);
-        return  response()->json($post,200);
+        return  response()->json(['post'=>$post],200);
     }
 
     /**
@@ -83,7 +83,7 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        $post = Post::find($id);
+        $post = Post::findorFail($id);
         $post->delete();
         return  response()->json(['post'=>$post,'msg'=>'successfully Deleted'],200);
     }

@@ -74,12 +74,12 @@
                             <div class="modal-body">
                                 <div class="form-group">
                                     <label for="name">Name</label>
-                                    <input type="text" class="form-control" name="title">
+                                    <input type="text" class="form-control" name="title" required>
                                     <span id="titleErr" class="mb-2"></span>
                                 </div>
                                 <div class="form-group">
                                     <label for="description">Description</label>
-                                    <textarea name="description" id="" class="form-control" rows="5"></textarea>
+                                    <textarea name="description" id="" class="form-control" rows="5" required></textarea>
                                     <span id="descErr" class="mb-2"></span>
                                 </div>
                         </div>
@@ -108,18 +108,16 @@
             var descData = document.getElementsByClassName('descData');
             axios.get('/api/posts')
                 .then(res => {
-                   res.data.forEach(item => {
-                       console.log(item)
-                       postData.innerHTML += ' <tr><td class="idData">'+item.id+'</td> <td class="titleData">'+item.title+'</td> <td class="descData">'+item.description+'</td> <td class="btnData"> <button class="btn btn-success btn-sm"  data-toggle="modal" data-target="#exampleModal" onclick="editBtn('+item.id +')" >Edit</button> <button class="btn btn-danger btn-sm" onclick="deleteBtn('+item.id+')">Delete</button> </td> </tr>'
-
+                   res.data.posts.forEach(item => {
+                        // console.log(item)
+                       DisplayPost(item);
                    })
                 })
                 .catch(err=>console.log(err))
             //Crate
-          var MyForm = document.forms['myForm'];
+            var MyForm = document.forms['myForm'];
             var titleInput = MyForm['title'];
             var descriptionInput = MyForm['description'];
-
             MyForm.onsubmit = (e) => {
                 e.preventDefault();
                 axios.post('/api/posts',{
@@ -129,12 +127,10 @@
                      .then(res => {
                          console.log(res.data);
                          var msg = document.getElementById('msg');
-
                          if(res.data.msg == "Succssfully Inserted"){
                              msgAlert(res);
                              MyForm.reset();
-                             DisplayPost(res.data[0]);
-
+                             DisplayPost(res.data.post);
                          }else{
                              $titleErr = document.getElementById('titleErr');
                              $descriptionErr = document.getElementById('descErr');
@@ -145,25 +141,20 @@
                      .catch((err) =>{
                          console.log(err.response);
                      })
-
             };
             //edit & Update
             var editForm = document.forms['editForm'];
             var editTitleForm = editForm['title'];
             var editDescForm = editForm['description'];
-            var postIdToUpdate;
-            var oldValue;
+            var postIdToUpdate,oldValue;
             //EditForm
             function  editBtn(postId){
 
                 postIdToUpdate = postId;
                 axios.get('api/posts/' + postId)
                      .then(res => {
-                         editTitleForm.value = res.data.title;
+                         editTitleForm.value = oldValue = res.data.title;
                          editDescForm.value = res.data.description;
-                         oldValue = res.data.title;
-
-
                      })
                      .catch(err => console.log(err))
             }
@@ -188,29 +179,24 @@
                 })
                 .catch(err => console.log(err))
             }
-
             //delete
             function deleteBtn(postId){
-                axios.delete('api/posts/' + postId)
-                    .then(res => {
-                        msgAlert(res)
-                        for(var i= 0;i < titleData.length;i++){
-                            if(titleData[i].innerHTML == res.data.post.title){
-                                idData[i].style.display = 'none';
-                                titleData[i].style.display = 'none';
-                                descData[i].style.display = 'none';
-                                btnData[i].style.display = 'none';
+                if(confirm("Are you sure to delete?")) {
+                    axios.delete('api/posts/' + postId)
+                        .then(res => {
+                            msgAlert(res)
+                            for (var i = 0; i < titleData.length; i++) {
+                                if (titleData[i].innerHTML == res.data.post.title) {
+                                    idData[i].style.display = titleData[i].style.display =descData[i].style.display = btnData[i].style.display ='none';
+                                }
                             }
-                        }
-                    })
-                    .catch(err => console.log(err))
+                        })
+                        .catch(err => console.log(err))
+                }
             };
-
-
-
             //Helper Function
             function DisplayPost(res){
-                postData.innerHTML += ' <tr><td>'+res.id+'</td> <td>'+res.title+'</td> <td>'+res.description+'</td> <td> <button class="btn btn-success btn-sm"  data-toggle="modal" data-target="#exampleModal" onclick="editBtn('+res.id +')" >Edit</button> <button class="btn btn-danger btn-sm" onclick="deleteBtn('+res.id+')">Delete</button> </td> </tr>';
+                postData.innerHTML += ' <tr><td class="idData">'+res.id+'</td> <td class="titleData">'+res.title+'</td> <td class="descData">'+res.description+'</td> <td class="btnData"> <button class="btn btn-success btn-sm"  data-toggle="modal" data-target="#exampleModal" onclick="editBtn('+res.id +')" >Edit</button> <button class="btn btn-danger btn-sm" onclick="deleteBtn('+res.id+')">Delete</button> </td> </tr>'
             }
             function msgAlert(res){
                 document.getElementById('successMsg').innerHTML = '<div class="alert alert-success alert-dismissible fade show" role="alert"> <strong>'+res.data.msg+'</strong>  <button type="button" class="close" data-dismiss="alert" aria-label="Close" > <span aria-hidden="true">&times;</span></button> </div>';
