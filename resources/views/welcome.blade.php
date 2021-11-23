@@ -7,7 +7,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Laravel Api With Axios</title>
     <!-- CSS only -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+
     <style>
         body{
             padding-top:60px;
@@ -19,6 +20,7 @@
             <div class="row">
                 <div class="col-md-8">
                     <h4>Posts</h4>
+                    <span id="successMsg"></span>
                     <table class="table table-bordered table-hover">
 
                         <thead>
@@ -57,45 +59,59 @@
 
 
         <!-- Modal -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label for="name">Name</label>
-                            <input type="text" class="form-control" name="title">
-                            <span id="titleErr" class="mb-2"></span>
+
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Edit Post</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
                         </div>
-                        <div class="form-group">
-                            <label for="description">Description</label>
-                            <textarea name="description" id="" class="form-control" rows="5"></textarea>
-                            <span id="descErr" class="mb-2"></span>
+                        <form name="editForm" id="closeForm">
+                        <div class="modal-body">
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="name">Name</label>
+                                    <input type="text" class="form-control" name="title">
+                                    <span id="titleErr" class="mb-2"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="description">Description</label>
+                                    <textarea name="description" id="" class="form-control" rows="5"></textarea>
+                                    <span id="descErr" class="mb-2"></span>
+                                </div>
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Update</button>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
+        </form>
 
         <!-- JavaScript Bundle with Popper -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-    {{--axios--}}
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF" crossorigin="anonymous"></script>
+
+        {{--axios--}}
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <script>
             //Read
+            var postData =  document.getElementById('post');
+            var titleData = document.getElementsByClassName('titleData');
+            var idData = document.getElementsByClassName('idData');
+            var btnData = document.getElementsByClassName('btnData');
+            var descData = document.getElementsByClassName('descData');
             axios.get('/api/posts')
                 .then(res => {
-                   var postData =  document.getElementById('post');
                    res.data.forEach(item => {
-                       postData.innerHTML += ' <tr><td>'+item.id+'</td> <td>'+item.title+'</td> <td>'+item.description+'</td> <td> <button class="btn btn-success btn-sm"  data-bs-toggle="modal" data-bs-target="#exampleModal">Edit</button> <button class="btn btn-danger btn-sm">Delete</button> </td> </tr>'
+                       console.log(item)
+                       postData.innerHTML += ' <tr><td class="idData">'+item.id+'</td> <td class="titleData">'+item.title+'</td> <td class="descData">'+item.description+'</td> <td class="btnData"> <button class="btn btn-success btn-sm"  data-toggle="modal" data-target="#exampleModal" onclick="editBtn('+item.id +')" >Edit</button> <button class="btn btn-danger btn-sm" onclick="deleteBtn('+item.id+')">Delete</button> </td> </tr>'
+
                    })
                 })
                 .catch(err=>console.log(err))
@@ -111,12 +127,14 @@
                     description:descriptionInput.value
                 })
                      .then(res => {
-                         console.log(res.data.msg);
+                         console.log(res.data);
                          var msg = document.getElementById('msg');
 
                          if(res.data.msg == "Succssfully Inserted"){
-                             msg.innerHTML = '<div class="alert alert-warning alert-dismissible fade show" role="alert"> <strong>'+res.data.msg+'</strong>  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> </div>'
+                             msgAlert(res);
                              MyForm.reset();
+                             DisplayPost(res.data[0]);
+
                          }else{
                              $titleErr = document.getElementById('titleErr');
                              $descriptionErr = document.getElementById('descErr');
@@ -129,9 +147,74 @@
                      })
 
             };
+            //edit & Update
+            var editForm = document.forms['editForm'];
+            var editTitleForm = editForm['title'];
+            var editDescForm = editForm['description'];
+            var postIdToUpdate;
+            var oldValue;
+            //EditForm
+            function  editBtn(postId){
+
+                postIdToUpdate = postId;
+                axios.get('api/posts/' + postId)
+                     .then(res => {
+                         editTitleForm.value = res.data.title;
+                         editDescForm.value = res.data.description;
+                         oldValue = res.data.title;
+
+
+                     })
+                     .catch(err => console.log(err))
+            }
+            //updateForm
+            editForm.onsubmit = function (event){
+                event.preventDefault();
+                //console.log(postIdToUpdate)
+                axios.put('api/posts/'+ postIdToUpdate,{
+                    title:editTitleForm.value,
+                    description: editDescForm.value,
+                })
+                .then(res  => {
+                    console.log(res)
+                    msgAlert(res);
+                    $('#closeForm').modal('hide');
+                    for(var i = 0; i < titleData.length;i++){
+                        if(titleData[i].innerHTML == oldValue){
+                            titleData[i].innerHTML = editTitleForm.value;
+                            descData[i].innerHTML = editDescForm.value;
+                        }
+                    }
+                })
+                .catch(err => console.log(err))
+            }
+
+            //delete
+            function deleteBtn(postId){
+                axios.delete('api/posts/' + postId)
+                    .then(res => {
+                        msgAlert(res)
+                        for(var i= 0;i < titleData.length;i++){
+                            if(titleData[i].innerHTML == res.data.post.title){
+                                idData[i].style.display = 'none';
+                                titleData[i].style.display = 'none';
+                                descData[i].style.display = 'none';
+                                btnData[i].style.display = 'none';
+                            }
+                        }
+                    })
+                    .catch(err => console.log(err))
+            };
 
 
 
+            //Helper Function
+            function DisplayPost(res){
+                postData.innerHTML += ' <tr><td>'+res.id+'</td> <td>'+res.title+'</td> <td>'+res.description+'</td> <td> <button class="btn btn-success btn-sm"  data-toggle="modal" data-target="#exampleModal" onclick="editBtn('+res.id +')" >Edit</button> <button class="btn btn-danger btn-sm" onclick="deleteBtn('+res.id+')">Delete</button> </td> </tr>';
+            }
+            function msgAlert(res){
+                document.getElementById('successMsg').innerHTML = '<div class="alert alert-success alert-dismissible fade show" role="alert"> <strong>'+res.data.msg+'</strong>  <button type="button" class="close" data-dismiss="alert" aria-label="Close" > <span aria-hidden="true">&times;</span></button> </div>';
+            }
 
         </script>
 
